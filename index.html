@@ -1,0 +1,1088 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#123B3A">
+<meta name="description" content="Meal Rush: serve hot meals to students across 11 campuses. A World Food Movement fundraiser game.">
+<title>Meal Rush</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=DM+Sans:wght@500;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: one phone-width column filling the screen; Home, Play and Game over swap in place.
+   Single committed look (deep teal kitchen-van night with yolk-yellow food), dark in both themes. */
+:root {
+  --ground: #123B3A;
+  --panel: #1C514F;
+  --line: #2F6E6A;
+  --ink: #FFFFFF;
+  --muted: #BFD8D4;
+  --yolk: #FFC857;
+  --yolk-deep: #C9962A;
+  --tomato: #F0563B;
+  --leaf: #6FD08C;
+  --sky: #BFE3F2;
+  --stone: #F3E3C3;
+  --stone-deep: #E9D3A6;
+  --road: #4A5560;
+  --grass: #6FB36B;
+  --card: #FFFFFF;
+  --card-ink: #123B3A;
+  --cone: #FF8A3D;
+  --dim: rgba(8, 28, 27, 0.86);
+  --display: 'Fredoka', 'Trebuchet MS', system-ui, sans-serif;
+  --body: 'DM Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  color-scheme: dark;
+}
+[hidden] { display: none !important; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 15px;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+}
+button { font: inherit; color: inherit; cursor: pointer; }
+button:focus-visible, a:focus-visible { outline: 3px solid var(--yolk); outline-offset: 2px; }
+
+#app {
+  height: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  box-sizing: border-box;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+}
+.screen { flex: 1; min-height: 0; display: flex; flex-direction: column; position: relative; }
+.scroll { overflow-y: auto; -webkit-overflow-scrolling: touch; }
+
+.label { font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.cta {
+  border: 0;
+  border-radius: 20px;
+  min-height: 60px;
+  width: 100%;
+  background: var(--yolk);
+  color: var(--card-ink);
+  font-family: var(--display);
+  font-size: 24px;
+  font-weight: 700;
+  box-shadow: 0 5px 0 var(--yolk-deep);
+  flex: none;
+}
+.cta:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--yolk-deep); }
+.textlink { border: 0; background: transparent; min-height: 44px; font-weight: 700; color: var(--muted); text-decoration: underline; flex: none; }
+.bar { height: 10px; border-radius: 5px; background: var(--panel); overflow: hidden; }
+.bar > div { height: 100%; border-radius: 5px; transition: width 0.25s; }
+
+/* ---------- Home ---------- */
+.home { gap: 14px; padding-bottom: 4px; }
+.home .eyebrow { text-align: center; margin-top: 8px; }
+.logo { margin: 0; text-align: center; font-family: var(--display); font-weight: 700; font-size: clamp(52px, 16vw, 68px); line-height: 0.95; color: var(--yolk); text-wrap: balance; }
+.lede { margin: 0 auto; max-width: 30ch; text-align: center; color: var(--muted); font-size: 16px; line-height: 1.4; text-wrap: balance; }
+.hero { border-radius: 24px; overflow: hidden; background: var(--sky); flex: none; }
+.hero svg { display: block; width: 100%; height: auto; }
+.hero .steam path { animation: steam 1.6s ease-in-out infinite; }
+.hero .steam path:nth-child(2) { animation-delay: 0.3s; }
+.hero .steam path:nth-child(3) { animation-delay: 0.6s; }
+@keyframes steam { 0%, 100% { opacity: 0.2; transform: translateY(2px); } 50% { opacity: 1; transform: translateY(-3px); } }
+.how { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.how li { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; line-height: 1.35; color: var(--muted); }
+.how b { color: var(--ink); }
+.how svg { flex: none; width: 20px; height: 20px; margin-top: 1px; }
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.stat { background: var(--panel); border-radius: 16px; padding: 10px 6px; text-align: center; }
+.stat strong { display: block; font-family: var(--display); font-weight: 700; font-size: 22px; line-height: 1; color: var(--yolk); font-variant-numeric: tabular-nums; }
+.stat span { display: block; margin-top: 4px; font-size: 12px; font-weight: 700; color: var(--muted); }
+.goal-row { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; font-weight: 700; color: var(--muted); margin-bottom: 6px; }
+.best { text-align: center; font-size: 13px; font-weight: 700; color: var(--muted); min-height: 18px; }
+.home .cta { margin-top: auto; }
+
+/* ---------- Play: HUD ---------- */
+.hud { display: flex; align-items: center; gap: 10px; min-height: 52px; flex: none; }
+.hud-l { flex: 1; min-width: 0; }
+.hud-title { font-family: var(--display); font-weight: 700; font-size: 20px; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hud-r { text-align: right; flex: none; }
+.meals { font-family: var(--display); font-weight: 700; font-size: 30px; line-height: 1; color: var(--yolk); font-variant-numeric: tabular-nums; display: inline-block; }
+.meals.bump { animation: bump 0.3s ease-out; }
+@keyframes bump { 40% { transform: scale(1.25); } }
+.icon-btn { flex: none; width: 44px; height: 44px; border: 0; border-radius: 14px; background: var(--panel); display: flex; align-items: center; justify-content: center; }
+.icon-btn svg { width: 22px; height: 22px; }
+
+.phase { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.row { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 24px; flex: none; }
+.strikes { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; color: var(--muted); }
+.strike { width: 14px; height: 14px; border-radius: 7px; box-sizing: border-box; border: 2px solid var(--tomato); }
+.strike.on { background: var(--tomato); }
+#hereBar { background: var(--yolk); }
+
+.scene { position: relative; margin-top: 12px; height: clamp(96px, 19vh, 170px); border-radius: 22px; overflow: hidden; background: var(--sky); flex: none; }
+.scene svg { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+.rush .scene { box-shadow: 0 0 0 3px var(--tomato); }
+
+.grid { flex: 1; min-height: 0; margin-top: 12px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.slot {
+  position: relative; min-height: 0; box-sizing: border-box;
+  border: 2px solid var(--line); border-radius: 18px; background: var(--panel);
+  padding: 10px; display: flex; flex-direction: column; gap: 6px; text-align: left;
+  transition: transform 0.08s, border-color 0.2s;
+  touch-action: manipulation;
+}
+.slot:active { transform: scale(0.97); }
+.slot .top { display: flex; align-items: center; gap: 10px; min-height: 0; }
+.slot .ava { width: 40px; height: 48px; flex: none; }
+.slot .ava .shirt { fill: var(--shirt, #5B8DEF); }
+.slot .ava .hair { fill: var(--hair, #3A2A22); }
+.slot .ava .skin { fill: var(--skin, #F2C9A0); }
+.slot .mood { font-family: var(--display); font-weight: 600; font-size: 15px; line-height: 1.1; }
+.slot .sub { font-size: 12px; color: var(--muted); }
+.slot .pbar { height: 10px; border-radius: 5px; background: var(--ground); overflow: hidden; flex: none; }
+.slot .pfill { height: 100%; width: 100%; border-radius: 5px; background: var(--leaf); }
+.slot .serve { margin-top: auto; min-height: 34px; border-radius: 12px; background: var(--yolk); color: var(--card-ink); display: flex; align-items: center; justify-content: center; font-family: var(--display); font-weight: 700; font-size: 16px; flex: none; }
+.slot.warn .pfill { background: var(--yolk); }
+.slot.urgent { border-color: var(--tomato); }
+.slot.urgent .pfill { background: var(--tomato); }
+.slot.urgent .ava { animation: wiggle 0.35s ease-in-out infinite; }
+.slot.empty { border-style: dashed; background: transparent; }
+.slot.empty .top, .slot.empty .pbar, .slot.empty .serve { visibility: hidden; }
+.slot .next { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: var(--muted); }
+.slot.empty .next { display: flex; }
+.slot.miss { animation: shake 0.4s; border-color: var(--tomato); }
+@keyframes wiggle { 50% { transform: rotate(-6deg); } }
+@keyframes shake { 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
+
+/* denser lines at later campuses */
+.grid.g6 { grid-template-rows: repeat(3, minmax(0, 1fr)); }
+.grid.g9 { grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.grid.g6 .sub, .grid.g9 .sub { display: none; }
+.grid.g6 .slot { padding: 8px 10px; gap: 5px; }
+.grid.g6 .serve { min-height: 30px; }
+.grid.g9 .slot { padding: 7px; border-radius: 14px; gap: 4px; }
+.grid.g9 .top { gap: 6px; }
+.grid.g9 .ava { width: 28px; height: 34px; }
+.grid.g9 .mood { font-size: 13px; }
+.grid.g9 .pbar { height: 8px; }
+.grid.g9 .serve { min-height: 26px; font-size: 13px; border-radius: 9px; }
+.grid.g9 .next { font-size: 11px; }
+.dense .scene { height: clamp(56px, 9vh, 90px); }
+.avawrap { position: relative; flex: none; display: flex; }
+.slot .orders {
+  position: absolute; right: -8px; bottom: -4px; min-width: 22px; height: 22px; padding: 0 5px; box-sizing: border-box;
+  border-radius: 11px; border: 2px solid var(--panel); background: var(--tomato); color: var(--ink);
+  font-family: var(--display); font-weight: 700; font-size: 13px; line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+}
+.slot.hit { animation: hitpulse 0.18s; }
+@keyframes hitpulse { 50% { transform: scale(0.94); } }
+.slot .spillbox { position: absolute; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 4px; text-align: center; font-size: 12px; font-weight: 700; color: #F3D3A3; }
+.slot .spillbox svg { width: 56%; max-width: 70px; height: auto; }
+.slot.spill { border: 2px solid #8A5A32; background: #3A2E22; }
+.slot.spill .top, .slot.spill .pbar, .slot.spill .serve, .slot.spill .next { visibility: hidden; }
+.slot.spill .spillbox { display: flex; }
+
+.realgoal { flex: none; margin-top: 10px; }
+.realgoal .goal-row { font-size: 12px; margin-bottom: 4px; }
+.realgoal .bar { height: 6px; }
+.goalfill { width: 3%; background: var(--leaf); }
+
+/* travel */
+.heat-row { gap: 10px; justify-content: flex-start; }
+.heat-row .bar { flex: 1; height: 12px; }
+#heatBar { background: var(--yolk); transition: width 0.1s linear; }
+#heatBar.low { background: var(--tomato); }
+.road-wrap { position: relative; flex: 1; min-height: 0; margin-top: 12px; border-radius: 22px; overflow: hidden; background: var(--road); touch-action: none; }
+.road-wrap canvas { display: block; width: 100%; height: 100%; }
+.controls { display: flex; gap: 12px; margin-top: 12px; flex: none; }
+.controls button { flex: 1; min-height: 64px; border: 0; border-radius: 20px; background: var(--panel); display: flex; align-items: center; justify-content: center; }
+.controls button:active { background: var(--line); }
+.controls svg { width: 34px; height: 34px; }
+
+/* banners, floats, overlays */
+.banner {
+  position: absolute; left: 0; right: 0; top: 58px; z-index: 5;
+  padding: 12px 16px; border-radius: 18px; text-align: center;
+  background: var(--yolk); color: var(--card-ink); box-shadow: 0 4px 0 var(--yolk-deep);
+  animation: pop 0.35s cubic-bezier(.2, 1.4, .4, 1);
+  pointer-events: none;
+}
+.banner.rush { background: var(--tomato); color: var(--ink); box-shadow: 0 4px 0 #A8341F; }
+.banner.info { background: var(--card); color: var(--card-ink); box-shadow: 0 4px 0 var(--line); }
+.banner strong { display: block; font-family: var(--display); font-size: 21px; font-weight: 700; line-height: 1.15; text-wrap: balance; }
+.banner span { display: block; margin-top: 2px; font-size: 13px; font-weight: 700; }
+@keyframes pop { from { transform: scale(0.7); opacity: 0; } }
+.float {
+  position: absolute; z-index: 6; pointer-events: none; transform: translate(-50%, -50%);
+  font-family: var(--display); font-weight: 700; font-size: 20px; color: var(--yolk);
+  text-shadow: 0 2px 0 var(--ground); white-space: nowrap;
+  animation: rise 0.9s ease-out forwards;
+}
+.float.bad { color: var(--tomato); }
+.dense .float { font-size: 16px; }
+@keyframes rise { to { transform: translate(-50%, -150%); opacity: 0; } }
+.overlay { position: absolute; inset: -12px -16px; z-index: 8; background: var(--dim); display: flex; align-items: center; justify-content: center; padding: 24px; }
+.overlay .card { width: 100%; max-width: 360px; box-sizing: border-box; padding: 24px 20px; border-radius: 24px; background: var(--card); color: var(--card-ink); text-align: center; animation: pop 0.35s cubic-bezier(.2, 1.4, .4, 1); }
+.overlay h2 { margin: 0; font-family: var(--display); font-size: 30px; font-weight: 700; line-height: 1.1; text-wrap: balance; }
+.overlay p { margin: 8px 0 0; font-size: 15px; line-height: 1.4; }
+
+/* ---------- Game over ---------- */
+.over { align-items: center; text-align: center; gap: 12px; padding-bottom: 4px; }
+.over-eyebrow { margin-top: 12px; color: var(--tomato); font-size: 13px; }
+.over h2 { margin: 0; font-family: var(--display); font-size: 32px; font-weight: 700; line-height: 1.1; text-wrap: balance; }
+.over .sub { margin: 0; color: var(--muted); font-size: 15px; line-height: 1.4; max-width: 32ch; }
+.score-row { width: 100%; box-sizing: border-box; padding: 14px 16px; border-radius: 20px; background: var(--panel); display: flex; align-items: center; justify-content: space-between; gap: 10px; flex: none; }
+.score-row span { font-size: 14px; font-weight: 700; color: var(--muted); text-align: left; }
+.score-row strong { font-family: var(--display); font-size: 28px; font-weight: 700; line-height: 1; color: var(--yolk); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ask-title { margin: 4px 0 0; font-family: var(--display); font-size: 24px; font-weight: 700; line-height: 1.15; color: var(--yolk); text-wrap: balance; }
+.ask { margin: 0; color: var(--muted); font-size: 15px; line-height: 1.4; max-width: 32ch; }
+.qr { width: 196px; height: 196px; flex: none; box-sizing: border-box; padding: 12px; border-radius: 20px; background: var(--card); position: relative; }
+.qr a, .qr img { display: block; width: 100%; height: 100%; }
+.qr img { image-rendering: pixelated; }
+.qr .finder { position: absolute; width: 42px; height: 42px; box-sizing: border-box; border: 8px solid var(--card-ink); border-radius: 6px; }
+.qr .f1 { left: 12px; top: 12px; } .qr .f2 { right: 12px; top: 12px; } .qr .f3 { left: 12px; bottom: 12px; }
+.qr .ph { position: absolute; left: 62px; top: 62px; right: 12px; bottom: 12px; border: 2px dashed #8AA6A3; border-radius: 6px; display: flex; align-items: center; justify-content: center; padding: 4px; font-size: 12px; font-weight: 700; color: var(--card-ink); }
+.scan { margin: 0; font-family: var(--display); font-size: 20px; font-weight: 700; }
+.tiers { width: 100%; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.tier { background: var(--panel); border-radius: 14px; padding: 10px 4px; }
+.tier strong { display: block; font-family: var(--display); font-size: 20px; font-weight: 700; line-height: 1; color: var(--yolk); }
+.tier span { display: block; margin-top: 4px; font-size: 12px; font-weight: 700; color: var(--muted); }
+.over .cta { margin-top: 6px; }
+
+.hud-l .label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@media (max-height: 760px) {
+  .over { gap: 8px; }
+  .over h2 { font-size: 24px; }
+  .over-eyebrow { margin-top: 4px; }
+  .over .sub { font-size: 14px; }
+  .score-row { padding: 10px 14px; }
+  .score-row strong { font-size: 24px; }
+  .ask-title { font-size: 20px; margin: 0; }
+  .ask { font-size: 14px; }
+  .qr { width: 136px; height: 136px; padding: 8px; }
+  .qr .finder { width: 32px; height: 32px; border-width: 6px; }
+  .qr .ph { left: 46px; top: 46px; right: 8px; bottom: 8px; }
+  .qr .f1 { left: 8px; top: 8px; } .qr .f2 { right: 8px; top: 8px; } .qr .f3 { left: 8px; bottom: 8px; }
+  .scan { font-size: 17px; }
+  .tier { padding: 8px 4px; }
+  .tier strong { font-size: 17px; }
+  .home { gap: 10px; }
+  .hero svg { max-height: 110px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+}
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- HOME -->
+  <section id="home" class="screen home scroll">
+    <div class="label eyebrow">World Food Movement presents</div>
+    <h1 class="logo">Meal Rush</h1>
+    <p class="lede">Serve hot meals to hungry students across 11 campuses. Don't let anyone leave hungry.</p>
+    <div class="hero" aria-hidden="true">
+      <svg viewBox="0 0 360 150">
+        <rect x="16" y="34" width="108" height="78" rx="4" fill="#F3E3C3"/>
+        <rect x="50" y="14" width="40" height="98" rx="4" fill="#E9D3A6"/>
+        <circle cx="70" cy="34" r="9" fill="#FFFFFF" stroke="#123B3A" stroke-width="3"/>
+        <rect x="26" y="52" width="16" height="12" fill="#7FB3C8"/><rect x="98" y="52" width="16" height="12" fill="#7FB3C8"/>
+        <rect x="26" y="78" width="16" height="12" fill="#7FB3C8"/><rect x="98" y="78" width="16" height="12" fill="#7FB3C8"/>
+        <rect x="62" y="88" width="16" height="24" rx="8" fill="#123B3A"/>
+        <rect x="0" y="112" width="360" height="38" fill="#4A5560"/>
+        <rect x="0" y="128" width="360" height="3" fill="#FFFFFF" opacity="0.7"/>
+        <g transform="translate(150 40)">
+          <g class="steam" stroke="#FFFFFF" stroke-width="3" fill="none" stroke-linecap="round">
+            <path d="M38 8 Q34 2 38 -4"/><path d="M54 8 Q50 2 54 -4"/><path d="M70 8 Q66 2 70 -4"/>
+          </g>
+          <rect x="4" y="14" width="130" height="62" rx="10" fill="#F0563B"/>
+          <path d="M134 32 L164 32 Q178 32 182 50 L184 76 L134 76 Z" fill="#F0563B"/>
+          <path d="M140 40 L162 40 Q170 40 173 54 L140 54 Z" fill="#BFE3F2"/>
+          <rect x="16" y="26" width="80" height="28" rx="6" fill="#FFFFFF"/>
+          <rect x="22" y="34" width="68" height="12" rx="6" fill="#FFC857"/>
+          <circle cx="42" cy="80" r="15" fill="#123B3A"/><circle cx="42" cy="80" r="6" fill="#BFD8D4"/>
+          <circle cx="152" cy="80" r="15" fill="#123B3A"/><circle cx="152" cy="80" r="6" fill="#BFD8D4"/>
+        </g>
+      </svg>
+    </div>
+    <ul class="how">
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="#FFC857" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9 v4 l3 2"/></svg><span><b>Tap a student to serve a tray</b> before their patience runs out. Each tray is 10 meals. A number means they want more trays.</span></li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="#FFC857" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 16 V8 h11 v8"/><path d="M14 11 h4 l3 3 v2 h-7"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg><span><b>Drive to the next campus.</b> Swipe to grab food and dodge cones. Hot meals earn a bonus.</span></li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="#F0563B" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><path d="M8 8 l8 8"/></svg><span><b>Every campus gets busier:</b> longer lines, bigger orders, spills. Three students left hungry and the run ends.</span></li>
+    </ul>
+    <div class="stats">
+      <div class="stat"><strong id="statReal">30,000</strong><span>meals served</span></div>
+      <div class="stat"><strong>11</strong><span>campuses</span></div>
+      <div class="stat"><strong id="statCost">$8</strong><span>per hot meal</span></div>
+    </div>
+    <div>
+      <div class="goal-row"><span>Our real goal</span><span id="goalText">1,000,000 meals by 2030</span></div>
+      <div class="bar"><div class="goalfill"></div></div>
+    </div>
+    <button id="startBtn" class="cta" type="button">Start serving</button>
+    <div class="best" id="bestHome"></div>
+  </section>
+
+  <!-- PLAY -->
+  <section id="play" class="screen" hidden>
+    <header class="hud">
+      <div class="hud-l">
+        <div class="label" id="hudLabel">Campus 1 of 11</div>
+        <div class="hud-title" id="hudTitle">Campus 1</div>
+      </div>
+      <button id="muteBtn" class="icon-btn" type="button" aria-label="Mute sound">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9 H8 L13 5 V19 L8 15 H4 Z"/><path id="muteWaves" d="M16.5 9 Q18.5 12 16.5 15 M19 6.5 Q23 12 19 17.5"/><path id="muteX" d="M17 9 L22 15 M22 9 L17 15" hidden/></svg>
+      </button>
+      <div class="hud-r">
+        <div class="label">Meals served</div>
+        <div class="meals" id="mealsHud">0</div>
+      </div>
+    </header>
+
+    <div id="servePhase" class="phase">
+      <div class="row" style="margin-top: 8px">
+        <div class="strikes" aria-label="Students left hungry"><span>Left hungry</span><span class="strike" id="s0"></span><span class="strike" id="s1"></span><span class="strike" id="s2"></span></div>
+        <div class="label" id="traysLabel">Trays 0 / 6</div>
+      </div>
+      <div class="bar" style="margin-top: 8px; flex: none"><div id="hereBar" style="width: 0%"></div></div>
+      <div class="scene" aria-hidden="true">
+        <svg viewBox="0 0 360 150" preserveAspectRatio="xMidYMax slice">
+          <rect x="30" y="34" width="300" height="80" rx="4" fill="#F3E3C3"/>
+          <rect x="140" y="8" width="80" height="106" rx="4" fill="#E9D3A6"/>
+          <circle cx="180" cy="28" r="12" fill="#FFFFFF" stroke="#123B3A" stroke-width="3"/>
+          <path d="M180 28 v-6 M180 28 l4 3" stroke="#123B3A" stroke-width="2" stroke-linecap="round"/>
+          <g fill="#7FB3C8"><rect x="48" y="50" width="22" height="16"/><rect x="82" y="50" width="22" height="16"/><rect x="256" y="50" width="22" height="16"/><rect x="290" y="50" width="22" height="16"/><rect x="48" y="80" width="22" height="16"/><rect x="82" y="80" width="22" height="16"/><rect x="256" y="80" width="22" height="16"/><rect x="290" y="80" width="22" height="16"/></g>
+          <rect x="168" y="74" width="24" height="40" rx="12" fill="#123B3A"/>
+          <rect x="0" y="110" width="360" height="40" fill="#6FB36B"/>
+          <rect x="20" y="118" width="320" height="26" rx="8" fill="#F0563B"/>
+          <text x="180" y="136" text-anchor="middle" font-family="Fredoka, Trebuchet MS, sans-serif" font-weight="700" font-size="13" fill="#FFFFFF" letter-spacing="1">WORLD FOOD MOVEMENT</text>
+          <g id="trays"></g>
+        </svg>
+      </div>
+      <div class="grid" id="slots"></div>
+      <div class="realgoal">
+        <div class="goal-row"><span id="realLine">30,000 real meals served</span><span id="goalLine">Goal: 1,000,000 by 2030</span></div>
+        <div class="bar"><div class="goalfill"></div></div>
+      </div>
+    </div>
+
+    <div id="travelPhase" class="phase" hidden>
+      <div class="row heat-row" style="margin-top: 8px">
+        <svg width="20" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFC857" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 4 Q3 8 6 12 Q9 16 6 20"/><path d="M12 4 Q9 8 12 12 Q15 16 12 20"/><path d="M18 4 Q15 8 18 12 Q21 16 18 20"/></svg>
+        <div class="bar"><div id="heatBar" style="width: 100%"></div></div>
+        <span class="label">Meals hot</span>
+      </div>
+      <div class="road-wrap" id="roadWrap"><canvas id="road" aria-label="Road to the next campus"></canvas></div>
+      <div class="controls">
+        <button id="leftBtn" type="button" aria-label="Move left"><svg viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5 L8 12 L15 19"/></svg></button>
+        <button id="rightBtn" type="button" aria-label="Move right"><svg viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5 L16 12 L9 19"/></svg></button>
+      </div>
+    </div>
+
+    <div id="banner" class="banner" hidden><strong id="bannerTitle"></strong><span id="bannerText"></span></div>
+    <div id="overlay" class="overlay" hidden><div class="card"><h2 id="ovTitle"></h2><p id="ovText"></p></div></div>
+  </section>
+
+  <!-- GAME OVER -->
+  <section id="over" class="screen over scroll" hidden>
+    <div class="label over-eyebrow" id="overEyebrow">Game over</div>
+    <h2 id="overTitle">Sorry, you didn't serve fast enough</h2>
+    <div class="score-row"><span>You served in the game</span><strong id="overMeals">0 meals</strong></div>
+    <div class="best" id="overBest"></div>
+    <p class="sub" id="overSub">Want to try again, or serve real meals?</p>
+    <p class="ask-title" id="askTitle">Don't worry, the real game has just started.</p>
+    <p class="ask" id="askLine">Be part of it. $8 serves one hot meal to a community college student.</p>
+    <div class="qr" id="qr"></div>
+    <p class="scan" id="scanText">Scan the QR code to donate</p>
+    <div class="tiers" id="tiers"></div>
+    <button id="againBtn" class="cta" type="button">Play again</button>
+    <button id="homeBtn" class="textlink" type="button">Back to home</button>
+  </section>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script>
+(() => {
+  // ===== Settings you can change =====
+  const CONFIG = {
+    DONATE_URL: '',        // paste the donation link here to show a real, scannable QR code
+    CAMPUS_NAMES: [],      // optional: the 11 campus names in route order, e.g. ['De Anza', ...]
+    MEAL_COST: 8,          // dollars per real meal
+    REAL_MEALS: 30000,     // real meals served so far
+    GOAL: 1000000,         // real goal
+    GOAL_YEAR: 2030
+  };
+  const TOTAL = 11;
+  const PER_TRAY = 10;
+  const MILESTONES = [100, 200, 500, 1000, 1500, 2000];
+
+  const $ = (id) => document.getElementById(id);
+  const fmt = (n) => n.toLocaleString('en-US');
+  const css = getComputedStyle(document.documentElement);
+  const C = (name) => css.getPropertyValue(name).trim();
+  const COL = {
+    road: C('--road'), grass: C('--grass'), yolk: C('--yolk'), tomato: C('--tomato'), stone: C('--stone'),
+    stoneDeep: C('--stone-deep'), ground: C('--ground'), sky: C('--sky'), card: C('--card'), cone: C('--cone'), leaf: C('--leaf')
+  };
+
+  // ----- static text from config -----
+  const goalPct = Math.max(1, Math.round((CONFIG.REAL_MEALS / CONFIG.GOAL) * 100));
+  document.querySelectorAll('.goalfill').forEach((el) => { el.style.width = goalPct + '%'; });
+  $('statReal').textContent = fmt(CONFIG.REAL_MEALS);
+  $('statCost').textContent = '$' + CONFIG.MEAL_COST;
+  $('goalText').textContent = fmt(CONFIG.GOAL) + ' meals by ' + CONFIG.GOAL_YEAR;
+  $('realLine').textContent = fmt(CONFIG.REAL_MEALS) + ' real meals served';
+  $('goalLine').textContent = 'Goal: ' + fmt(CONFIG.GOAL) + ' by ' + CONFIG.GOAL_YEAR;
+  $('askLine').textContent = 'Be part of it. $' + CONFIG.MEAL_COST + ' serves one hot meal to a community college student.';
+  $('tiers').innerHTML = [1, 5, 10, 25].map((m) =>
+    '<div class="tier"><strong>$' + fmt(m * CONFIG.MEAL_COST) + '</strong><span>' + m + (m === 1 ? ' meal' : ' meals') + '</span></div>').join('');
+
+  // ----- storage (optional) -----
+  let best = 0, muted = false;
+  try { best = parseInt(localStorage.getItem('mealrush-best') || '0', 10) || 0; } catch (e) {}
+  try { muted = localStorage.getItem('mealrush-muted') === '1'; } catch (e) {}
+  function saveBest() { try { localStorage.setItem('mealrush-best', String(best)); } catch (e) {} }
+  function showBest() { $('bestHome').textContent = best ? 'Your best: ' + fmt(best) + ' meals' : ''; }
+  showBest();
+
+  // ----- sound + haptics -----
+  let ac = null;
+  function initAudio() {
+    if (ac) { if (ac.state === 'suspended') ac.resume().catch(() => {}); return; }
+    try { ac = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { ac = null; }
+  }
+  function tone(f, d, type, vol, when) {
+    if (muted || !ac) return;
+    try {
+      const t = ac.currentTime + (when || 0);
+      const o = ac.createOscillator(), g = ac.createGain();
+      o.type = type || 'triangle';
+      o.frequency.setValueAtTime(f, t);
+      g.gain.setValueAtTime(vol || 0.12, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + d);
+      o.connect(g); g.connect(ac.destination);
+      o.start(t); o.stop(t + d + 0.02);
+    } catch (e) {}
+  }
+  const sfx = {
+    serve() { tone(880, 0.1); tone(1320, 0.14, 'triangle', 0.08, 0.05); },
+    combo() { tone(1568, 0.12, 'triangle', 0.08, 0.1); },
+    miss() { tone(180, 0.32, 'sawtooth', 0.1); tone(130, 0.3, 'sawtooth', 0.08, 0.12); },
+    milestone() { [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.26, 'triangle', 0.12, i * 0.09)); },
+    clear() { [392, 523, 659, 784].forEach((f, i) => tone(f, 0.2, 'triangle', 0.1, i * 0.08)); },
+    pick() { tone(760, 0.07, 'square', 0.05); tone(1140, 0.07, 'square', 0.04, 0.05); },
+    bump() { tone(110, 0.25, 'square', 0.1); },
+    rush() { [660, 660, 880].forEach((f, i) => tone(f, 0.12, 'square', 0.06, i * 0.12)); }
+  };
+  function buzz(p) { try { if (navigator.vibrate) navigator.vibrate(p); } catch (e) {} }
+  function setMuted(m) {
+    muted = m;
+    $('muteWaves').toggleAttribute('hidden', m);
+    $('muteX').toggleAttribute('hidden', !m);
+    $('muteBtn').setAttribute('aria-label', m ? 'Turn sound on' : 'Mute sound');
+    try { localStorage.setItem('mealrush-muted', m ? '1' : '0'); } catch (e) {}
+  }
+  setMuted(muted);
+  $('muteBtn').addEventListener('click', () => { initAudio(); setMuted(!muted); });
+
+  let wake = null;
+  function keepAwake() { try { navigator.wakeLock && navigator.wakeLock.request('screen').then((w) => { wake = w; }).catch(() => {}); } catch (e) {} }
+  function letSleep() { try { wake && wake.release(); } catch (e) {} wake = null; }
+
+  // ----- screens -----
+  function show(id) { ['home', 'play', 'over'].forEach((s) => { $(s).hidden = s !== id; }); }
+  const campusName = (n) => CONFIG.CAMPUS_NAMES[n - 1] || ('Campus ' + n);
+  // Difficulty by campus: more students in line, bigger orders, spills, less patience
+  function level(n) {
+    return {
+      slots: n === 1 ? 4 : (n <= 3 ? 6 : 9),
+      maxOrder: n < 3 ? 1 : (n < 5 ? 2 : (n < 8 ? 3 : 4)),
+      multiChance: n < 3 ? 0 : Math.min(0.75, 0.35 + (n - 3) * 0.06),
+      spillChance: n < 6 ? 0 : Math.min(0.22, 0.1 + (n - 6) * 0.03),
+      patience: Math.max(3, 7.5 - (n - 1) * 0.45),   // seconds a one-tray student waits
+      gap: Math.max(0.15, 0.7 - n * 0.05),           // pause before the next student steps up
+      need: 4 + 3 * n                                // trays to clear: 7, 10, 13 ... 37
+    };
+  }
+  const INTRO = {
+    2: ['More students!', 'Now 6 students wait in line at once.'],
+    3: ['Extra hungry students', 'Some want 2 trays. Keep tapping until their number runs out.'],
+    4: ['Lunch crowd', 'Now 9 students wait in line. Keep up!'],
+    5: ['Bigger orders', 'Some students now want up to 3 trays.'],
+    6: ['Watch for spills!', "Don't tap the puddles. Slipping costs 10 meals."],
+    8: ['Huge appetites', 'Orders of up to 4 trays, and everyone is in a hurry.']
+  };
+
+  const G = { L: level(1), meals: 0, campus: 1, strikes: 0, served: 0, need: 6, phase: 'idle', hold: 0, holdNext: null, combo: 0, lastServe: -9, rushDone: true, rushT: 0, time: 0, bannerT: 0 };
+
+  // ----- serve phase: student slots -----
+  const LOOKS = {
+    shirt: ['#F0563B', '#5B8DEF', '#FFC857', '#B07BE0', '#6FD08C', '#FF8A3D'],
+    hair: ['#3A2A22', '#1E1A18', '#7A4B2A', '#C98E4E', '#2B2140'],
+    skin: ['#F2C9A0', '#D9A273', '#A8714A', '#7A4E30', '#F7D9BC']
+  };
+  const pick = (a) => a[Math.floor(Math.random() * a.length)];
+  const slotsEl = $('slots');
+  const slots = [0, 1, 2, 3, 4, 5, 6, 7, 8].map((i) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'slot empty';
+    b.setAttribute('aria-label', 'Serve student ' + (i + 1));
+    b.innerHTML =
+      '<div class="top"><span class="avawrap"><svg class="ava" viewBox="0 0 46 54" aria-hidden="true">' +
+      '<circle class="skin" cx="23" cy="15" r="12"/><path class="hair" d="M11 13 Q23 -4 35 13 Q23 6 11 13 Z"/>' +
+      '<circle cx="19" cy="16" r="1.8" fill="#123B3A"/><circle cx="27" cy="16" r="1.8" fill="#123B3A"/>' +
+      '<path d="M19 21 Q23 23 27 21" stroke="#123B3A" stroke-width="1.6" fill="none" stroke-linecap="round"/>' +
+      '<path class="shirt" d="M5 54 Q5 30 23 30 Q41 30 41 54 Z"/></svg><span class="orders" hidden>2</span></span>' +
+      '<div style="min-width:0"><div class="mood">Waiting</div><div class="sub">Patience</div></div></div>' +
+      '<div class="pbar"><div class="pfill"></div></div><div class="serve">Serve</div>' +
+      '<div class="next">Next student...</div>' +
+      '<div class="spillbox"><svg viewBox="0 0 80 40" aria-hidden="true"><path d="M8 26 Q2 14 18 12 Q24 2 40 8 Q58 0 66 12 Q80 16 72 28 Q66 38 46 34 Q30 40 18 34 Q6 34 8 26 Z" fill="#8A5A32"/><ellipse cx="30" cy="18" rx="8" ry="3" fill="#B98552"/></svg>Spill! Don\'t tap</div>';
+    slotsEl.appendChild(b);
+    const s = {
+      el: b, fill: b.querySelector('.pfill'), mood: b.querySelector('.mood'),
+      badge: b.querySelector('.orders'), label: b.querySelector('.serve'),
+      state: 'empty', p: 1, factor: 1, wait: 0.3, cls: '', orders: 1, life: 0
+    };
+    b.addEventListener('pointerdown', (e) => { e.preventDefault(); serve(s); });
+    b.addEventListener('click', (e) => { if (e.detail === 0) serve(s); }); // keyboard
+    b.addEventListener('animationend', () => b.classList.remove('miss', 'hit'));
+    return s;
+  });
+  const activeSlots = () => slots.slice(0, G.L.slots);
+  const pendingTrays = () => activeSlots().reduce((a, s) => a + (s.state === 'waiting' ? s.orders : 0), 0);
+
+  function setOrders(s) {
+    s.badge.hidden = s.orders <= 1;
+    s.badge.textContent = s.orders;
+    s.label.textContent = s.orders > 1 ? 'Serve x' + s.orders : 'Serve';
+  }
+
+  function spawn(s) {
+    const L = G.L;
+    s.el.classList.remove('miss', 'hit');
+    if (L.spillChance && Math.random() < L.spillChance) {
+      s.state = 'spill';
+      s.life = 2.2 + Math.random() * 0.8;
+      s.el.classList.remove('empty');
+      s.el.classList.add('spill');
+      return;
+    }
+    let orders = 1;
+    if (L.maxOrder > 1 && Math.random() < L.multiChance) orders = 2 + Math.floor(Math.random() * (L.maxOrder - 1));
+    orders = Math.max(1, Math.min(orders, G.need - G.served - pendingTrays()));
+    s.state = 'waiting';
+    s.p = 1;
+    s.orders = orders;
+    s.factor = (0.85 + Math.random() * 0.4) * (1 + 0.45 * (orders - 1)); // bigger orders get a bit more time
+    s.el.style.setProperty('--shirt', pick(LOOKS.shirt));
+    s.el.style.setProperty('--hair', pick(LOOKS.hair));
+    s.el.style.setProperty('--skin', pick(LOOKS.skin));
+    s.el.classList.remove('empty', 'spill');
+    setOrders(s);
+  }
+  function emptySlot(s, wait) {
+    s.state = 'empty';
+    s.wait = wait;
+    s.el.classList.add('empty');
+    s.el.classList.remove('warn', 'urgent', 'spill');
+    s.cls = '';
+  }
+
+  function renderSlots() {
+    for (const s of activeSlots()) {
+      if (s.state !== 'waiting') continue;
+      s.fill.style.width = Math.max(0, s.p * 100).toFixed(1) + '%';
+      const cls = s.p > 0.5 ? '' : (s.p > 0.25 ? 'warn' : 'urgent');
+      if (cls !== s.cls) {
+        s.el.classList.remove('warn', 'urgent');
+        if (cls) s.el.classList.add(cls);
+        s.mood.textContent = cls === '' ? 'Waiting' : (cls === 'warn' ? 'Hungry' : 'Leaving!');
+        s.cls = cls;
+      }
+    }
+  }
+
+  function renderHud() {
+    $('mealsHud').textContent = fmt(G.meals);
+    for (let i = 0; i < 3; i++) $('s' + i).classList.toggle('on', i < G.strikes);
+    $('traysLabel').textContent = 'Trays ' + G.served + ' / ' + G.need;
+    $('hereBar').style.width = Math.min(100, (G.served / G.need) * 100) + '%';
+    // plates stacked on the serving table, one per tray still to serve (max 8)
+    const left = Math.max(0, Math.min(8, G.need - G.served));
+    let svg = '';
+    for (let i = 0; i < left; i++) {
+      const x = 38 + i * 36;
+      svg += '<g transform="translate(' + x + ' 104)"><ellipse cx="14" cy="8" rx="15" ry="5" fill="#FFFFFF"/><ellipse cx="14" cy="5" rx="9" ry="4" fill="#FFC857"/></g>';
+    }
+    $('trays').innerHTML = svg;
+  }
+
+  function bumpMeals() {
+    const el = $('mealsHud');
+    el.classList.remove('bump');
+    void el.offsetWidth;
+    el.classList.add('bump');
+  }
+
+  function floatAt(x, y, text, bad) {
+    const play = $('play').getBoundingClientRect();
+    const f = document.createElement('div');
+    f.className = 'float' + (bad ? ' bad' : '');
+    f.textContent = text;
+    const edge = Math.min(70, play.width / 4);
+    f.style.left = Math.max(edge, Math.min(play.width - edge, x - play.left)) + 'px';
+    f.style.top = (y - play.top) + 'px';
+    $('play').appendChild(f);
+    f.addEventListener('animationend', () => f.remove());
+  }
+  function floatOn(el, text, bad) {
+    const r = el.getBoundingClientRect();
+    floatAt(r.left + r.width / 2, r.top + r.height * 0.35, text, bad);
+  }
+
+  function showBanner(title, text, kind, secs) {
+    $('bannerTitle').textContent = title;
+    $('bannerText').textContent = text || '';
+    const b = $('banner');
+    b.className = 'banner' + (kind ? ' ' + kind : '');
+    b.hidden = false;
+    b.style.animation = 'none'; void b.offsetWidth; b.style.animation = '';
+    G.bannerT = secs || 2.4;
+  }
+
+  function addMeals(n) {
+    const before = G.meals;
+    G.meals += n;
+    bumpMeals();
+    const hit = MILESTONES.filter((m) => before < m && G.meals >= m).pop();
+    if (hit) {
+      showBanner('Congratulations! You served ' + fmt(hit) + ' meals', 'In real life, $' + CONFIG.MEAL_COST + ' serves one hot meal.', '', 2.8);
+      sfx.milestone();
+      buzz([30, 40, 30]);
+    }
+    renderHud();
+  }
+
+  function serve(s) {
+    initAudio();
+    if (G.phase !== 'serve' || G.hold > 0) return;
+    if (s.state === 'spill') { slip(s); return; }
+    if (s.state !== 'waiting') return;
+    G.combo = (G.time - G.lastServe < 1.1) ? G.combo + 1 : 1;
+    G.lastServe = G.time;
+    let gain = PER_TRAY, label = '+10 meals';
+    if (G.combo >= 3) { gain += 5; label = 'Combo x' + G.combo + '  +15'; sfx.combo(); }
+    sfx.serve();
+    buzz(12);
+    floatOn(s.el, label);
+    s.orders--;
+    G.served++;
+    if (s.orders > 0) {
+      setOrders(s);
+      s.p = Math.min(1, s.p + 0.1);
+      s.el.classList.remove('hit');
+      void s.el.offsetWidth;
+      s.el.classList.add('hit');
+    } else {
+      emptySlot(s, G.L.gap * (0.6 + Math.random() * 0.8));
+    }
+    addMeals(gain);
+    if (!G.rushDone && G.served >= Math.floor(G.need / 2) && G.served < G.need) {
+      G.rushDone = true;
+      G.rushT = 5;
+      activeSlots().forEach((x) => { if (x.state === 'empty') x.wait = 0; });
+      $('play').classList.add('rush');
+      showBanner('Lunch rush!', 'Students are pouring in. Serve fast.', 'rush', 2.2);
+      sfx.rush();
+    }
+    if (G.served >= G.need) campusCleared();
+  }
+
+  function slip(s) {
+    G.combo = 0;
+    emptySlot(s, 0.5);
+    s.el.classList.add('miss');
+    G.meals = Math.max(0, G.meals - 10);
+    floatOn(s.el, 'Slipped! -10', true);
+    sfx.bump();
+    buzz(120);
+    renderHud();
+  }
+
+  function miss(s) {
+    G.strikes++;
+    G.combo = 0;
+    emptySlot(s, 0.9);
+    s.el.classList.add('miss');
+    floatOn(s.el, 'Left hungry', true);
+    sfx.miss();
+    buzz(160);
+    renderHud();
+    if (G.strikes >= 3) {
+      G.phase = 'ending';
+      overlay('Game over', "Sorry, you didn't serve fast enough. Three students left hungry.", 2.2, () => gameOver(false));
+    }
+  }
+
+  function overlay(title, text, secs, next) {
+    $('ovTitle').textContent = title;
+    $('ovText').textContent = text;
+    $('overlay').hidden = false;
+    G.hold = secs;
+    G.holdNext = () => { $('overlay').hidden = true; next(); };
+  }
+
+  function startServe(n) {
+    G.phase = 'serve';
+    G.campus = n;
+    G.served = 0;
+    G.L = level(n);
+    G.need = G.L.need;
+    G.rushDone = n < 3;
+    G.rushT = 0;
+    G.combo = 0;
+    $('play').classList.remove('rush');
+    $('play').classList.toggle('dense', G.L.slots === 9);
+    slotsEl.className = 'grid' + (G.L.slots === 6 ? ' g6' : (G.L.slots === 9 ? ' g9' : ''));
+    slots.forEach((s, i) => { s.el.hidden = i >= G.L.slots; emptySlot(s, 0.2 + (i % 4) * 0.3 + Math.random() * 0.3); });
+    $('servePhase').hidden = false;
+    $('travelPhase').hidden = true;
+    $('hudLabel').textContent = 'Campus ' + n + ' of ' + TOTAL;
+    $('hudTitle').textContent = campusName(n);
+    renderHud();
+    const intro = INTRO[n];
+    if (intro) {
+      overlay(intro[0], intro[1] + ' Serve ' + G.need + ' trays to feed this campus.', 2.6, () => {});
+    } else {
+      showBanner(campusName(n), 'Serve ' + G.need + ' trays. Students wait about ' + Math.round(G.L.patience) + ' seconds.', 'info', 2);
+    }
+  }
+
+  function updateServe(dt) {
+    if (G.rushT > 0) { G.rushT -= dt; if (G.rushT <= 0) $('play').classList.remove('rush'); }
+    const dur = G.L.patience;
+    const mult = G.rushT > 0 ? 1.35 : 1;
+    for (const s of activeSlots()) {
+      if (s.state === 'empty') {
+        // no new students once enough trays are ordered to finish the campus
+        if (G.served + pendingTrays() < G.need || G.rushT > 0) { s.wait -= dt; if (s.wait <= 0) spawn(s); }
+      } else if (s.state === 'spill') {
+        s.life -= dt;
+        if (s.life <= 0) emptySlot(s, G.L.gap);
+      } else {
+        s.p -= (dt / (dur * s.factor)) * mult;
+        if (s.p <= 0) { miss(s); if (G.phase !== 'serve') return; }
+      }
+    }
+    renderSlots();
+  }
+
+  function campusCleared() {
+    G.phase = 'cleared';
+    $('play').classList.remove('rush');
+    sfx.clear();
+    buzz([20, 30, 20]);
+    const forgive = G.strikes > 0;
+    if (forgive) G.strikes--;
+    renderHud();
+    if (G.campus >= TOTAL) {
+      overlay('All 11 campuses fed!', 'You served ' + fmt(G.meals) + ' meals. Amazing run.', 2.2, () => gameOver(true));
+      return;
+    }
+    overlay(campusName(G.campus) + ' fed!',
+      (forgive ? 'One hungry student forgiven. ' : '') + 'Next stop: ' + campusName(G.campus + 1) + '. Grab food, dodge cones and keep the meals hot.',
+      2.2, startTravel);
+  }
+
+  // ----- travel phase: 3-lane drive -----
+  const canvas = $('road');
+  const ctx = canvas.getContext('2d');
+  const T = { lane: 1, x: 0, objs: [], spawn: 0.6, t: 0, dur: 9, heat: 100, scroll: 0, w: 0, h: 0, shake: 0 };
+  const laneW = () => T.w / 3;
+  const laneX = (i) => laneW() * (i + 0.5);
+
+  function sizeCanvas() {
+    const r = canvas.getBoundingClientRect();
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    T.w = r.width; T.h = r.height;
+    canvas.width = Math.round(r.width * dpr);
+    canvas.height = Math.round(r.height * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  window.addEventListener('resize', () => { if (G.phase === 'travel' || G.phase === 'arriving') sizeCanvas(); });
+
+  function startTravel() {
+    G.phase = 'travel';
+    $('servePhase').hidden = true;
+    $('travelPhase').hidden = false;
+    $('hudLabel').textContent = 'Next: campus ' + (G.campus + 1) + ' of ' + TOTAL;
+    $('hudTitle').textContent = campusName(G.campus + 1);
+    sizeCanvas();
+    T.lane = 1; T.x = laneX(1); T.objs = []; T.spawn = 0.5; T.t = 0; T.heat = 100; T.scroll = 0; T.shake = 0;
+    T.dur = 8 + Math.min(4, G.campus * 0.35);
+    $('heatBar').style.width = '100%';
+    $('heatBar').classList.remove('low');
+  }
+
+  function steer(d) {
+    initAudio();
+    if (G.phase !== 'travel' || G.hold > 0) return;
+    T.lane = Math.max(0, Math.min(2, T.lane + d));
+  }
+
+  function spawnObj() {
+    const lane = Math.floor(Math.random() * 3);
+    const food = Math.random() < 0.55;
+    T.objs.push({ lane, y: -40, kind: food ? 'food' : 'cone', food: Math.floor(Math.random() * 3), done: false });
+  }
+
+  function updateTravel(dt) {
+    T.t += dt;
+    T.heat = Math.max(0, T.heat - dt * 3);
+    if (T.shake > 0) T.shake -= dt;
+    const speed = T.h * (0.62 + G.campus * 0.045);
+    T.scroll += speed * dt;
+    T.x += (laneX(T.lane) - T.x) * Math.min(1, dt * 14);
+    const remaining = T.dur - T.t;
+    if (remaining > 1.8) {
+      T.spawn -= dt;
+      if (T.spawn <= 0) {
+        T.spawn = Math.max(0.36, 0.78 - G.campus * 0.035) * (0.8 + Math.random() * 0.5);
+        spawnObj();
+      }
+    }
+    const vw = laneW() * 0.52, vh = vw * 1.7, vy = T.h - vh - 16;
+    const size = laneW() * 0.46;
+    const vanLane = Math.round(T.x / laneW() - 0.5);
+    for (const o of T.objs) {
+      o.y += speed * dt;
+      if (o.done || o.lane !== vanLane) continue;
+      if (o.y + size / 2 > vy + 6 && o.y - size / 2 < vy + vh - 6) {
+        o.done = true;
+        const r = canvas.getBoundingClientRect();
+        if (o.kind === 'food') {
+          sfx.pick();
+          floatAt(r.left + laneX(o.lane), r.top + o.y, '+5 meals');
+          addMeals(5);
+        } else {
+          T.heat = Math.max(0, T.heat - 22);
+          T.shake = 0.3;
+          sfx.bump();
+          buzz(90);
+          floatAt(r.left + laneX(o.lane), r.top + o.y, 'Meals cooling!', true);
+        }
+      }
+    }
+    T.objs = T.objs.filter((o) => !o.done && o.y < T.h + 60);
+    $('heatBar').style.width = T.heat.toFixed(0) + '%';
+    $('heatBar').classList.toggle('low', T.heat < 30);
+    if (T.t >= T.dur) arrive();
+  }
+
+  function arrive() {
+    G.phase = 'arriving';
+    const bonus = Math.round(T.heat / 10) * 5;
+    if (bonus > 0) addMeals(bonus);
+    sfx.clear();
+    overlay('Arrived at ' + campusName(G.campus + 1),
+      bonus > 0 ? 'Hot meal bonus: +' + bonus + ' meals.' : 'The meals cooled down. Dodge the cones next time.',
+      1.8, () => startServe(G.campus + 1));
+  }
+
+  function rr(x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+
+  function drawTravel() {
+    const w = T.w, h = T.h, lw = laneW();
+    ctx.save();
+    if (T.shake > 0) ctx.translate((Math.random() - 0.5) * 12 * (T.shake / 0.3), 0);
+    ctx.fillStyle = COL.road; ctx.fillRect(-10, 0, w + 20, h);
+    ctx.fillStyle = COL.grass; ctx.fillRect(-10, 0, 18, h); ctx.fillRect(w - 8, 0, 18, h);
+    // lane dashes
+    ctx.fillStyle = 'rgba(255,255,255,0.8)';
+    const dash = 34, gap = 26, off = T.scroll % (dash + gap);
+    for (let i = 1; i < 3; i++) for (let y = -dash + off; y < h; y += dash + gap) ctx.fillRect(lw * i - 2, y, 4, dash);
+
+    // campus gate rolling in at the end
+    const remaining = T.dur - T.t;
+    if (remaining < 2) {
+      const p = Math.min(1, (2 - remaining) / 2);
+      const gy = -100 + p * h * 0.42;
+      ctx.fillStyle = COL.stone; ctx.fillRect(0, gy, w, 90);
+      ctx.fillStyle = COL.stoneDeep; ctx.fillRect(w / 2 - 50, gy - 20, 100, 110);
+      ctx.fillStyle = COL.ground; rr(w / 2 - 18, gy + 50, 36, 40, 10); ctx.fill();
+      ctx.fillStyle = COL.ground;
+      ctx.font = '700 16px Fredoka, "Trebuchet MS", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(campusName(G.campus + 1), w / 2, gy + 30);
+    }
+
+    // objects
+    const size = lw * 0.46;
+    for (const o of T.objs) {
+      const x = laneX(o.lane), y = o.y;
+      if (o.kind === 'cone') {
+        ctx.fillStyle = COL.cone;
+        ctx.beginPath(); ctx.moveTo(x, y - size / 2); ctx.lineTo(x + size * 0.36, y + size * 0.36); ctx.lineTo(x - size * 0.36, y + size * 0.36); ctx.closePath(); ctx.fill();
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(x - size * 0.17, y - size * 0.06, size * 0.34, size * 0.14);
+        ctx.fillStyle = COL.cone; rr(x - size / 2, y + size * 0.32, size, size * 0.16, 4); ctx.fill();
+      } else if (o.food === 0) { // tomato
+        ctx.fillStyle = COL.tomato; ctx.beginPath(); ctx.arc(x, y, size * 0.42, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = COL.leaf; ctx.beginPath(); ctx.ellipse(x, y - size * 0.4, size * 0.18, size * 0.08, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = 'rgba(255,255,255,0.35)'; ctx.beginPath(); ctx.arc(x - size * 0.15, y - size * 0.12, size * 0.09, 0, Math.PI * 2); ctx.fill();
+      } else if (o.food === 1) { // bread
+        ctx.fillStyle = '#D9A066'; rr(x - size * 0.5, y - size * 0.3, size, size * 0.6, size * 0.28); ctx.fill();
+        ctx.strokeStyle = '#F3D3A3'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+        for (let i = -1; i <= 1; i++) { ctx.beginPath(); ctx.moveTo(x + i * size * 0.22 - 4, y - size * 0.14); ctx.lineTo(x + i * size * 0.22 + 4, y + size * 0.14); ctx.stroke(); }
+      } else { // rice bowl
+        ctx.fillStyle = '#FFFFFF'; ctx.beginPath(); ctx.arc(x, y, size * 0.36, Math.PI, 0); ctx.fill();
+        ctx.fillStyle = COL.sky; ctx.beginPath(); ctx.moveTo(x - size * 0.5, y); ctx.lineTo(x + size * 0.5, y); ctx.lineTo(x + size * 0.3, y + size * 0.36); ctx.lineTo(x - size * 0.3, y + size * 0.36); ctx.closePath(); ctx.fill();
+      }
+    }
+
+    // van, top-down
+    const vw = lw * 0.52, vh = vw * 1.7, vx = T.x - vw / 2, vy = h - vh - 16;
+    ctx.fillStyle = 'rgba(0,0,0,0.22)'; rr(vx + 4, vy + 6, vw, vh, 12); ctx.fill();
+    ctx.fillStyle = COL.ground;
+    ctx.fillRect(vx - 5, vy + vh * 0.16, 6, vh * 0.18); ctx.fillRect(vx + vw - 1, vy + vh * 0.16, 6, vh * 0.18);
+    ctx.fillRect(vx - 5, vy + vh * 0.68, 6, vh * 0.18); ctx.fillRect(vx + vw - 1, vy + vh * 0.68, 6, vh * 0.18);
+    ctx.fillStyle = COL.tomato; rr(vx, vy, vw, vh, 12); ctx.fill();
+    ctx.fillStyle = COL.sky; rr(vx + vw * 0.12, vy + vh * 0.07, vw * 0.76, vh * 0.16, 6); ctx.fill();
+    ctx.fillStyle = COL.card; rr(vx + vw * 0.12, vy + vh * 0.3, vw * 0.76, vh * 0.58, 8); ctx.fill();
+    ctx.fillStyle = COL.yolk; rr(vx + vw * 0.22, vy + vh * 0.38, vw * 0.56, vh * 0.08, 4); ctx.fill();
+    ctx.fillStyle = COL.yolk; rr(vx + vw * 0.22, vy + vh * 0.52, vw * 0.56, vh * 0.08, 4); ctx.fill();
+
+    // first-drive hint
+    if (G.campus === 1 && T.t < 2.6) {
+      ctx.fillStyle = 'rgba(18,59,58,0.9)';
+      rr(w / 2 - 130, 16, 260, 40, 14); ctx.fill();
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = '700 15px "DM Sans", system-ui, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Swipe or tap left and right', w / 2, 41);
+    }
+    ctx.restore();
+  }
+
+  // travel controls: tap a side, swipe, buttons, arrow keys
+  const roadWrap = $('roadWrap');
+  let downX = null;
+  roadWrap.addEventListener('pointerdown', (e) => { downX = e.clientX; });
+  roadWrap.addEventListener('pointerup', (e) => {
+    if (downX === null) return;
+    const dx = e.clientX - downX;
+    downX = null;
+    if (Math.abs(dx) > 28) steer(dx > 0 ? 1 : -1);
+    else {
+      const r = roadWrap.getBoundingClientRect();
+      steer(e.clientX - r.left < r.width / 2 ? -1 : 1);
+    }
+  });
+  $('leftBtn').addEventListener('pointerdown', (e) => { e.preventDefault(); steer(-1); });
+  $('rightBtn').addEventListener('pointerdown', (e) => { e.preventDefault(); steer(1); });
+  $('leftBtn').addEventListener('click', (e) => { if (e.detail === 0) steer(-1); });
+  $('rightBtn').addEventListener('click', (e) => { if (e.detail === 0) steer(1); });
+  window.addEventListener('keydown', (e) => {
+    if (G.phase === 'travel') {
+      if (e.key === 'ArrowLeft') { steer(-1); e.preventDefault(); }
+      if (e.key === 'ArrowRight') { steer(1); e.preventDefault(); }
+    } else if (G.phase === 'serve' && /^[1-9]$/.test(e.key) && parseInt(e.key, 10) <= G.L.slots) {
+      serve(slots[parseInt(e.key, 10) - 1]);
+    }
+  });
+
+  // ----- game over / win -----
+  function renderQR() {
+    const box = $('qr');
+    const url = (CONFIG.DONATE_URL || '').trim();
+    if (url && window.qrcode) {
+      try {
+        const q = window.qrcode(0, 'M');
+        q.addData(url);
+        q.make();
+        const img = '<img alt="QR code for the donation page" src="' + q.createDataURL(8, 0) + '">';
+        box.innerHTML = '<a href="' + url.replace(/"/g, '&quot;') + '" target="_blank" rel="noopener">' + img + '</a>';
+        $('scanText').textContent = 'Scan to donate, or tap the code';
+        return;
+      } catch (e) {}
+    }
+    box.innerHTML =
+      '<span class="finder f1"></span><span class="finder f2"></span><span class="finder f3"></span><div class="ph">QR code</div>';
+    $('scanText').textContent = 'Scan the QR code at our booth to donate';
+  }
+
+  function gameOver(won) {
+    G.phase = 'over';
+    letSleep();
+    const newBest = G.meals > best;
+    if (newBest) { best = G.meals; saveBest(); }
+    $('overEyebrow').textContent = won ? 'You did it' : 'Game over';
+    $('overTitle').textContent = won ? 'You fed all 11 campuses!' : "Sorry, you didn't serve fast enough";
+    $('overSub').textContent = won ? 'Want to play again, or serve real meals?' : 'Want to try again, or serve real meals?';
+    $('askTitle').textContent = won ? 'Now the real game starts.' : "Don't worry, the real game has just started.";
+    $('overMeals').textContent = fmt(G.meals) + ' meals';
+    $('overBest').textContent = newBest && G.meals > 0 ? 'New personal best!' : (best ? 'Your best: ' + fmt(best) + ' meals' : '');
+    renderQR();
+    show('over');
+    $('over').scrollTop = 0;
+  }
+
+  function startGame() {
+    initAudio();
+    keepAwake();
+    G.meals = 0; G.strikes = 0; G.time = 0; G.hold = 0; G.holdNext = null; G.lastServe = -9;
+    $('overlay').hidden = true;
+    $('banner').hidden = true;
+    show('play');
+    renderHud();
+    startServe(1);
+  }
+
+  $('startBtn').addEventListener('click', startGame);
+  $('againBtn').addEventListener('click', startGame);
+  $('homeBtn').addEventListener('click', () => { G.phase = 'idle'; showBest(); show('home'); $('home').scrollTop = 0; });
+
+  // ----- main loop -----
+  let last = 0, paused = false;
+  document.addEventListener('visibilitychange', () => {
+    paused = document.hidden;
+    if (!paused) { last = 0; if (G.phase !== 'idle' && G.phase !== 'over') keepAwake(); }
+  });
+  function frame(t) {
+    const dt = last ? Math.min(0.05, (t - last) / 1000) : 0;
+    last = t;
+    if (!paused && dt > 0) {
+      G.time += dt;
+      if (G.bannerT > 0) { G.bannerT -= dt; if (G.bannerT <= 0) $('banner').hidden = true; }
+      if (G.hold > 0) {
+        G.hold -= dt;
+        if (G.hold <= 0) { const n = G.holdNext; G.holdNext = null; G.hold = 0; if (n) n(); }
+      } else if (G.phase === 'serve') updateServe(dt);
+      else if (G.phase === 'travel') updateTravel(dt);
+      if (G.phase === 'travel' || G.phase === 'arriving') drawTravel();
+    }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+
+})();
+</script>
+</body>
+</html>
